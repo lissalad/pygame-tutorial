@@ -1,7 +1,10 @@
+from random import randint
 import pygame
 pygame.init()
 
 screen = pygame.display.set_mode([500,500])
+clock = pygame.time.Clock()
+
 
 # ------------ CLASSES -------------------- #
 class GameObject(pygame.sprite.Sprite):
@@ -14,9 +17,25 @@ class GameObject(pygame.sprite.Sprite):
   def render(self, screen):
     screen.blit(self.surf, (self.x, self.y))
 
+class Apple(GameObject):
+ def __init__(self):
+   super(Apple, self).__init__(0, 0, './images/apple.png')
+   self.dx = 0
+   self.dy = (randint(0, 200) / 100) + 1
+   self.reset()
+
+ def move(self):
+   self.x += self.dx
+   self.y += self.dy
+   if self.y > 500: 
+     self.reset()
+
+ def reset(self):
+   self.x = randint(50, 400)
+   self.y = -64
+
 # -------------- SPRITES -------------------- #
-apple = GameObject(200, 300, './images/apple.png')
-strawberry = GameObject(120, 300, './images/strawberry.png')
+apple = Apple()
 
 # ----------- GAME LOOP ---------------- #
 running = True 
@@ -30,18 +49,9 @@ while running:
   screen.fill((255, 255, 255))
       
   # ------------- DRAW --------------------------- #
-  fruit = 'a';
-  for i in range(0,3):
-    for e in range(0,3):
-      x = 500/3 * (e+.5)-32
-      y = 500/3 *(i+.5) -32
-      if fruit == 'a':
-        apple = GameObject(x, y, './images/apple.png')
-        apple.render(screen)
-        fruit = 's'
-      else:
-        strawberry = GameObject(x, y, './images/strawberry.png')
-        strawberry.render(screen)
-        fruit='a'
-  # Update the window
+  apple.move() 
+  apple.render(screen)
+
+  # --------- UPDATE --------------------------- #
   pygame.display.flip()
+  clock.tick(60)
