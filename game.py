@@ -3,6 +3,22 @@ pygame.init()
 
 screen = pygame.display.set_mode([500,500])
 
+# ------------ CLASSES -------------------- #
+class GameObject(pygame.sprite.Sprite):
+  def __init__(self, x, y, image):
+    super(GameObject, self).__init__()
+    self.surf = pygame.image.load(image)
+    self.x = x
+    self.y = y
+
+  def render(self, screen):
+    screen.blit(self.surf, (self.x, self.y))
+
+# -------------- SPRITES -------------------- #
+apple = GameObject(200, 300, './images/apple.png')
+strawberry = GameObject(120, 300, './images/strawberry.png')
+
+# ----------- GAME LOOP ---------------- #
 running = True 
 while running: 
 	# Looks at events 
@@ -13,46 +29,19 @@ while running:
 	# -------- CLEAR --------------------------- #
   screen.fill((255, 255, 255))
       
-# ------------- DRAW --------------------------- #
-
-
-# ----------- Update the display ---------------- #
-  pygame.display.flip()
-
-
-
-
-
-
-# ------------- GRAY GRID ------------------------#
+  # ------------- DRAW --------------------------- #
+  fruit = 'a';
   for i in range(0,3):
     for e in range(0,3):
-      color = (90, 90, 90)
-      position = (500/3 * (e+.5), 500/3 *(i+.5))
-      pygame.draw.circle(screen, color, position, 60)
-
-# --------------- FIVE ----------------------- #
-  color = (230, 60, 20)
-  position = (83, 83)
-  pygame.draw.circle(screen, color, position, 50)
-
-  color = (250, 160, 20)
-  position = (417, 83)
-  pygame.draw.circle(screen, color, position, 50) 
-
-  color = (250, 220, 20)
-  position = (250, 250)
-  pygame.draw.circle(screen, color, position, 50)
-
-  color = (50, 250, 140)
-  position = (83, 417)
-  pygame.draw.circle(screen, color, position, 50)
-
-  color = (50, 250, 240)
-  position = (417, 417)
-  pygame.draw.circle(screen, color, position, 50)
-
-# ------------- SAMPLE CIRCLE ---------------------- #
-  color = (255, 0, 255)
-  position = (250, 250)
-  pygame.draw.circle(screen, color, position, 75)
+      x = 500/3 * (e+.5)-32
+      y = 500/3 *(i+.5) -32
+      if fruit == 'a':
+        apple = GameObject(x, y, './images/apple.png')
+        apple.render(screen)
+        fruit = 's'
+      else:
+        strawberry = GameObject(x, y, './images/strawberry.png')
+        strawberry.render(screen)
+        fruit='a'
+  # Update the window
+  pygame.display.flip()
