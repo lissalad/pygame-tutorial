@@ -14,43 +14,111 @@ class GameObject(pygame.sprite.Sprite):
     self.surf = pygame.image.load(image)
     self.x = x
     self.y = y
+    self.rect = self.surf.get_rect() # add 
+
 
   def render(self, screen):
+    self.rect.x = self.x
+    self.rect.y = self.y
     screen.blit(self.surf, (self.x, self.y))
 
+class Bomb(GameObject):
+  def __init__(self):
+    super(Bomb, self).__init__(0, 0, './images/bomb.png')
+    self.dy = 0
+    self.dx = (randint(0, 200) / 100) + 1
+    self.reset()
+
+  def move(self):
+    self.x += self.dx
+    self.y += self.dy
+    if self.x > 500: 
+      self.reset()
+
+  def reset(self):
+    self.y = choice(lanes)
+    self.x = -64
+
+  def move_right(self):
+    self.x += self.dx
+    self.y += self.dy
+      
+  def reset_left(self):
+    self.x = choice(lanes)
+    self.y = -64
+
+  def reset_right(self):
+    self.x = choice(lanes)
+    self.y = 564
+
+  def reset_top(self):
+    self.x = 564
+    self.y = choice(lanes)
+
+  def reset_bottom(self):
+    self.x = -64
+    self.y = choice(lanes)
+
+
 class Apple(GameObject):
- def __init__(self):
+  def __init__(self):
    super(Apple, self).__init__(0, 0, './images/apple.png')
    self.dx = 0
    self.dy = (randint(0, 200) / 100) + 1
+   self.direction = "up"
    self.reset()
 
- def move(self):
-   self.x += self.dx
-   self.y += self.dy
-   if self.y > 500: 
-     self.reset()
+  def reset(self):
+    if self.direction == "down":
+      self.x = choice(lanes)
+      self.y = 564
+    elif self.direction == "up":
+      self.x = choice(lanes)
+      self.y = -64
 
- def reset(self):
-   self.x = choice(lanes)
-   self.y = -64
+  def move(self):
+    if self.direction == "down":
+      self.x -= self.dx
+      self.y -= self.dy
+      if self.y < -64: 
+        self.direction = "up"
+        self.reset()
+    elif self.direction == "up":
+      self.x += self.dx
+      self.y += self.dy  
+      if self.y > 564: 
+        self.direction = "down"
+        self.reset()    
 
 class Strawberry(GameObject):
- def __init__(self):
+  def __init__(self):
    super(Strawberry, self).__init__(0, 0, './images/strawberry.png')
    self.dy = 0
    self.dx = (randint(0, 200) / 100) + 1
+   self.direction = "right"
    self.reset()
 
- def move(self):
-   self.x += self.dx
-   self.y += self.dy
-   if self.x > 500: 
-     self.reset()
+  def reset(self):
+    if self.direction == "left":
+      self.y = choice(lanes)
+      self.x = 564
+    elif self.direction == "right":
+      self.y = choice(lanes)
+      self.x = -64
 
- def reset(self):
-   self.y = choice(lanes)
-   self.x = -64
+  def move(self):
+    if self.direction == "left":
+      self.y -= self.dy
+      self.x -= self.dx
+      if self.x < -64: 
+        self.direction = "right"
+        self.reset()
+    elif self.direction == "right":
+      self.y += self.dy
+      self.x += self.dx  
+      if self.x > 564: 
+        self.direction = "left"
+        self.reset()    
 
 class Player(GameObject):
   def __init__(self):
@@ -100,11 +168,21 @@ class Player(GameObject):
 apple = Apple()
 strawberry = Strawberry()
 player = Player()
+bomb = Bomb()
 
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
 all_sprites.add(strawberry)
 all_sprites.add(apple)
+# all_sprites.add(bomb)
+
+fruit_sprites = pygame.sprite.Group()
+fruit_sprites.add(apple)
+fruit_sprites.add(strawberry)
+# ----------- COLLISIONS? --------------- #
+fruit = pygame.sprite.spritecollideany(player, fruit_sprites)
+if fruit:
+	fruit.reset()
 
 # ----------- GAME LOOP ---------------- #
 running = True 
@@ -133,6 +211,9 @@ while running:
     entity.move()
     entity.render(screen)
 
+    fruit = pygame.sprite.spritecollideany(player, fruit_sprites)
+    if fruit:
+      fruit.reset()
   # --------- UPDATE --------------------------- #
   pygame.display.flip()
   clock.tick(60)
