@@ -1,3 +1,4 @@
+import random
 from random import randint, choice
 import pygame
 pygame.init()
@@ -16,7 +17,6 @@ class GameObject(pygame.sprite.Sprite):
     self.y = y
     self.rect = self.surf.get_rect() # add 
 
-
   def render(self, screen):
     self.rect.x = self.x
     self.rect.y = self.y
@@ -27,38 +27,49 @@ class Bomb(GameObject):
     super(Bomb, self).__init__(0, 0, './images/bomb.png')
     self.dy = 0
     self.dx = (randint(0, 200) / 100) + 1
+    self.direction = ""
     self.reset()
 
-  def move(self):
-    self.x += self.dx
-    self.y += self.dy
-    if self.x > 500: 
-      self.reset()
-
   def reset(self):
-    self.y = choice(lanes)
-    self.x = -64
+    self.get_random_direction()
+    if self.direction == "down":
+      self.x = choice(lanes)
+      self.y = 564
+    elif self.direction == "up":
+      self.x = choice(lanes)
+      self.y = -64
+    elif self.direction == "left":
+      self.y = choice(lanes)
+      self.x = 564
+    elif self.direction == "right":
+      self.y = choice(lanes)
+      self.x = -64
 
-  def move_right(self):
-    self.x += self.dx
-    self.y += self.dy
+  def move(self):
+    if self.direction == "left":
+      self.y -= self.dy
+      self.x -= self.dx
+      if self.x < -64: 
+        self.reset()
+    elif self.direction == "right":
+      self.y += self.dy
+      self.x += self.dx  
+      if self.x > 564: 
+        self.reset()    
+    elif self.direction == "down":
+      self.x -= self.dy
+      self.y -= self.dx
+      if self.y < -64: 
+        self.reset()
+    elif self.direction == "up":
+      self.x += self.dy
+      self.y += self.dx  
+      if self.y > 564: 
+        self.reset()  
       
-  def reset_left(self):
-    self.x = choice(lanes)
-    self.y = -64
-
-  def reset_right(self):
-    self.x = choice(lanes)
-    self.y = 564
-
-  def reset_top(self):
-    self.x = 564
-    self.y = choice(lanes)
-
-  def reset_bottom(self):
-    self.x = -64
-    self.y = choice(lanes)
-
+  def get_random_direction(self):
+    directions = ["down", "up", "left", "right"]
+    self.direction = random.choice(directions)
 
 class Apple(GameObject):
   def __init__(self):
@@ -174,7 +185,7 @@ all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
 all_sprites.add(strawberry)
 all_sprites.add(apple)
-# all_sprites.add(bomb)
+all_sprites.add(bomb)
 
 fruit_sprites = pygame.sprite.Group()
 fruit_sprites.add(apple)
@@ -214,6 +225,9 @@ while running:
     fruit = pygame.sprite.spritecollideany(player, fruit_sprites)
     if fruit:
       fruit.reset()
+      
+    if pygame.sprite.collide_rect(player, bomb):
+	    running = False
   # --------- UPDATE --------------------------- #
   pygame.display.flip()
   clock.tick(60)
