@@ -3,9 +3,17 @@ from random import randint, choice
 import pygame
 pygame.init()
 
-screen = pygame.display.set_mode([500,500])
+height = 500 #667
+width = 500 #375
+swimmer_height = None
+screen = pygame.display.set_mode([width,height])
 clock = pygame.time.Clock()
+
+lanes_y = [0,0,0,0]
+lanes_x = [0,0]
+
 lanes = [93, 218, 343]
+# bg = pygame.image.load("./images/underwater.png")
 
 
 # ------------ CLASSES -------------------- #
@@ -29,42 +37,48 @@ class Bomb(GameObject):
     self.dx = (randint(0, 200) / 100) + 1
     self.direction = ""
     self.reset()
+    self.w = self.surf.get_width()
+    self.h =self.surf.get_height()
+
+  def get_random_direction(self):
+    directions = ["down", "up", "left", "right"]
+    self.direction = random.choice(directions)
 
   def reset(self):
     self.get_random_direction()
     if self.direction == "down":
       self.x = choice(lanes)
-      self.y = 564
+      self.y = height + self.surf.get_height()
     elif self.direction == "up":
       self.x = choice(lanes)
-      self.y = -64
+      self.y = 0 - self.surf.get_height()
     elif self.direction == "left":
-      self.y = choice(lanes)
-      self.x = 564
+      self.y = choice(lanes_x)
+      self.x = width + self.surf.get_width()
     elif self.direction == "right":
-      self.y = choice(lanes)
-      self.x = -64
+      self.y = choice(lanes_x)
+      self.x = 0 - self.surf.get_width()
 
   def move(self):
     if self.direction == "left":
       self.y -= self.dy
       self.x -= self.dx
-      if self.x < -64: 
+      if self.x < 0 - self.surf.get_width(): 
         self.reset()
     elif self.direction == "right":
       self.y += self.dy
       self.x += self.dx  
-      if self.x > 564: 
+      if self.x > width + self.surf.get_width(): 
         self.reset()    
     elif self.direction == "down":
       self.x -= self.dy
       self.y -= self.dx
-      if self.y < -64: 
+      if self.y < 0 - self.surf.get_height(): 
         self.reset()
     elif self.direction == "up":
       self.x += self.dy
       self.y += self.dx  
-      if self.y > 564: 
+      if self.y > height + self.surf.get_height(): 
         self.reset()  
       
   def get_random_direction(self):
@@ -82,22 +96,22 @@ class Apple(GameObject):
   def reset(self):
     if self.direction == "down":
       self.x = choice(lanes)
-      self.y = 564
+      self.y = height + self.surf.get_height()
     elif self.direction == "up":
       self.x = choice(lanes)
-      self.y = -64
+      self.y = 0 - self.surf.get_height()
 
   def move(self):
     if self.direction == "down":
       self.x -= self.dx
       self.y -= self.dy
-      if self.y < -64: 
+      if self.y < 0 - self.surf.get_height(): 
         self.direction = "up"
         self.reset()
     elif self.direction == "up":
       self.x += self.dx
       self.y += self.dy  
-      if self.y > 564: 
+      if self.y > height + self.surf.get_height():
         self.direction = "down"
         self.reset()    
 
@@ -112,28 +126,28 @@ class Strawberry(GameObject):
   def reset(self):
     if self.direction == "left":
       self.y = choice(lanes)
-      self.x = 564
+      self.x = width + self.surf.get_width()
     elif self.direction == "right":
       self.y = choice(lanes)
-      self.x = -64
+      self.x = 0 - self.surf.get_width()
 
   def move(self):
     if self.direction == "left":
       self.y -= self.dy
       self.x -= self.dx
-      if self.x < -64: 
+      if self.x < 0 - self.surf.get_width():
         self.direction = "right"
         self.reset()
     elif self.direction == "right":
       self.y += self.dy
       self.x += self.dx  
-      if self.x > 564: 
+      if width + self.surf.get_width(): 
         self.direction = "left"
         self.reset()    
 
 class Player(GameObject):
   def __init__(self):
-    super(Player, self).__init__(0, 0, './images/player.png')
+    super(Player, self).__init__(0, 0, './images/diver.png')
     self.dx = 0
     self.dy = 0
     self.pos_x = 1
@@ -146,7 +160,7 @@ class Player(GameObject):
       self.update_dx_dy()
 
   def right(self):
-    if self.pos_x < len(lanes) - 1:
+    if self.pos_x < len(lanes_x) - 1:
       self.pos_x += 1
       self.update_dx_dy()
 
@@ -156,7 +170,7 @@ class Player(GameObject):
       self.update_dx_dy()
 
   def down(self):
-    if self.pos_y < len(lanes) - 1:
+    if self.pos_y < len(lanes_y) - 1:
       self.pos_y += 1
       self.update_dx_dy()
 
@@ -165,15 +179,14 @@ class Player(GameObject):
     self.y -= (self.y - self.dy) * 0.25
 
   def reset(self):
-    self.x = lanes[self.pos_x]
-    self.y = lanes[self.pos_y]
+    self.x = lanes_x[self.pos_x]
+    self.y = lanes_y[self.pos_y]
     self.dx = self.x
     self.dy = self.y
 
   def update_dx_dy(self):
-    self.dx = lanes[self.pos_x]
-    self.dy = lanes[self.pos_y]
-
+    self.dx = lanes_x[self.pos_x]
+    self.dy = lanes_y[self.pos_y]
 
 # -------------- SPRITES -------------------- #
 apple = Apple()
@@ -183,13 +196,26 @@ bomb = Bomb()
 
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
-all_sprites.add(strawberry)
-all_sprites.add(apple)
-all_sprites.add(bomb)
+# all_sprites.add(strawberry)
+# all_sprites.add(apple)
+# all_sprites.add(bomb)
 
 fruit_sprites = pygame.sprite.Group()
 fruit_sprites.add(apple)
 fruit_sprites.add(strawberry)
+
+# ---------- SET VERTICAL LANES --------------- #
+num_v = 3
+player_height = player.surf.get_height()
+offset=player_height/num_v
+lanes_y = [offset, height/num_v-offset, height*(2/num_v)-offset, height-player_height]
+
+# ---------- SET HORIZONTAL LANES --------------- #
+num_h = 2
+player_width = player.surf.get_width()
+offset = player_width/num_h
+lanes_x = [0, width-player_width]
+
 # ----------- COLLISIONS? --------------- #
 fruit = pygame.sprite.spritecollideany(player, fruit_sprites)
 if fruit:
@@ -225,9 +251,10 @@ while running:
     fruit = pygame.sprite.spritecollideany(player, fruit_sprites)
     if fruit:
       fruit.reset()
-      
-    if pygame.sprite.collide_rect(player, bomb):
-	    running = False
+
+    # if pygame.sprite.collide_rect(player, bomb):
+	  #   running = False
   # --------- UPDATE --------------------------- #
+  # screen.blit(bg, (0, 0))
   pygame.display.flip()
   clock.tick(60)
