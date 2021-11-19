@@ -6,15 +6,12 @@ pygame.init()
 height = 667
 width = 375
 swimmer_height = None
-screen = pygame.display.set_mode([width,height])
+screen = pygame.display.set_mode([500,500])
 clock = pygame.time.Clock()
 
-counter = 0
-lanes_y = [0,0,0,0]
+lanes_y = [0,0,0]
 lanes_x = [0,0]
-
 lanes = [93, 218, 343]
-bg = pygame.image.load("./images/underwater.png")
 
 
 # ------------ CLASSES -------------------- #
@@ -34,52 +31,46 @@ class GameObject(pygame.sprite.Sprite):
 class Bomb(GameObject):
   def __init__(self):
     super(Bomb, self).__init__(0, 0, './images/bomb.png')
-    self.dy = lanes_x[-1]
+    self.dy = 0
     self.dx = (randint(0, 200) / 100) + 1
     self.direction = ""
     self.reset()
-    self.w = self.surf.get_width()
-    self.h =self.surf.get_height()
-
-  def get_random_direction(self):
-    directions = ["down", "up", "left", "right"]
-    self.direction = random.choice(directions)
 
   def reset(self):
     self.get_random_direction()
     if self.direction == "down":
-      self.x = choice(lanes_x)
-      self.y = height + self.surf.get_height()
+      self.x = choice(lanes)
+      self.y = 564
     elif self.direction == "up":
-      self.x = choice(lanes_x)
-      self.y = 0 - self.surf.get_height()
+      self.x = choice(lanes)
+      self.y = -64
     elif self.direction == "left":
-      self.y = choice(lanes_y)
-      self.x = width + self.surf.get_width()
+      self.y = choice(lanes)
+      self.x = 564
     elif self.direction == "right":
-      self.y = choice(lanes_y)
-      self.x = 0 - self.surf.get_width()
+      self.y = choice(lanes)
+      self.x = -64
 
   def move(self):
     if self.direction == "left":
       self.y -= self.dy
       self.x -= self.dx
-      if self.x < 0 - self.surf.get_width(): 
+      if self.x < -64: 
         self.reset()
     elif self.direction == "right":
       self.y += self.dy
       self.x += self.dx  
-      if self.x > width + self.surf.get_width(): 
+      if self.x > 564: 
         self.reset()    
     elif self.direction == "down":
       self.x -= self.dy
       self.y -= self.dx
-      if self.y < 0 - self.surf.get_height(): 
+      if self.y < -64: 
         self.reset()
     elif self.direction == "up":
       self.x += self.dy
       self.y += self.dx  
-      if self.y > height + self.surf.get_height(): 
+      if self.y > 564: 
         self.reset()  
       
   def get_random_direction(self):
@@ -96,23 +87,23 @@ class Apple(GameObject):
 
   def reset(self):
     if self.direction == "down":
-      self.x = choice(lanes_x)
-      self.y = height + self.surf.get_height()
+      self.x = choice(lanes)
+      self.y = 564
     elif self.direction == "up":
-      self.x = choice(lanes_x)
-      self.y = 0 - self.surf.get_height()
+      self.x = choice(lanes)
+      self.y = -64
 
   def move(self):
     if self.direction == "down":
       self.x -= self.dx
       self.y -= self.dy
-      if self.y < 0 - self.surf.get_height(): 
+      if self.y < -64: 
         self.direction = "up"
         self.reset()
     elif self.direction == "up":
       self.x += self.dx
       self.y += self.dy  
-      if self.y > height + self.surf.get_height():
+      if self.y > 564: 
         self.direction = "down"
         self.reset()    
 
@@ -145,58 +136,25 @@ class Strawberry(GameObject):
       if width + self.surf.get_width(): 
         self.direction = "left"
         self.reset()    
-
-class Fish(GameObject):
-  def __init__(self):
-   super(Fish, self).__init__(0, 0, './images/fish.png')
-   self.dy = 0
-   self.dx = (randint(0, 200) / 100) + 1
-   self.direction = "right"
-   self.reset()
-
-  def reset(self):
-    if self.direction == "left":
-      self.y = choice(lanes_y)
-      self.x = width + self.surf.get_width()
-    elif self.direction == "right":
-      self.y = choice(lanes_y)
-      self.x = 0 - self.surf.get_width()
-
-  def move(self):
-    if self.direction == "left":
-      self.y -= self.dy
-      self.x -= self.dx
-      if self.x < 0 - self.surf.get_width():
-        self.direction = "right"
-        self.reset()
-    elif self.direction == "right":
-      self.y += self.dy
-      self.x += self.dx  
-      if width + self.surf.get_width(): 
-        self.direction = "left"
-        self.reset()    
-
+        
 class Player(GameObject):
   def __init__(self):
-    super(Player, self).__init__(1,1, './images/shark.png')
+    super(Player, self).__init__(0, 0, './images/player.png')
     self.dx = 0
     self.dy = 0
     self.pos_x = 1
-    self.pos_y = 1
+    self.pos_y = 1 
     self.reset()
 
   def left(self):
     if self.pos_x > 0:
       self.pos_x -= 1
       self.update_dx_dy()
-      self.surf = pygame.transform.flip(self.surf, True,False)
 
   def right(self):
-    if self.pos_x < len(lanes_x) - 1:
+    if self.pos_x < len(lanes) - 1:
       self.pos_x += 1
       self.update_dx_dy()
-      self.surf = pygame.transform.flip(self.surf, True,False)
-
 
   def up(self):
     if self.pos_y > 0:
@@ -204,45 +162,41 @@ class Player(GameObject):
       self.update_dx_dy()
 
   def down(self):
-    if self.pos_y < len(lanes_y) - 1:
+    if self.pos_y < len(lanes) - 1:
       self.pos_y += 1
       self.update_dx_dy()
 
   def move(self):
-    self.x -= (self.x - self.dx) * 0.06
-    self.y -= (self.y - self.dy) * 0.03
+    self.x -= (self.x - self.dx) * 0.25
+    self.y -= (self.y - self.dy) * 0.25
 
   def reset(self):
-    self.x = lanes_x[self.pos_x]
-    self.y = lanes_y[self.pos_y]
+    self.x = lanes[self.pos_x]
+    self.y = lanes[self.pos_y]
     self.dx = self.x
     self.dy = self.y
 
   def update_dx_dy(self):
-    self.dx = lanes_x[self.pos_x]
-    self.dy = lanes_y[self.pos_y]
+    self.dx = lanes[self.pos_x]
+    self.dy = lanes[self.pos_y]
+
+
 
 # -------------- SPRITES -------------------- #
 apple = Apple()
 strawberry = Strawberry()
 player = Player()
 bomb = Bomb()
-fish = Fish()
 
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
-# all_sprites.add(strawberry)
-# all_sprites.add(apple)
-all_sprites.add(fish)
-
+all_sprites.add(strawberry)
+all_sprites.add(apple)
 all_sprites.add(bomb)
 
-# fruit_sprites = pygame.sprite.Group()
-# fruit_sprites.add(apple)
-# fruit_sprites.add(strawberry)
-
-fish_sprites = pygame.sprite.Group()
-fish_sprites.add(fish)
+fruit_sprites = pygame.sprite.Group()
+fruit_sprites.add(apple)
+fruit_sprites.add(strawberry)
 
 # ---------- SET VERTICAL LANES --------------- #
 num_v = 3
@@ -255,6 +209,11 @@ num_h = 2
 player_width = player.surf.get_width()
 offset = player_width/num_h
 lanes_x = [player_width*.2, width-player_width*1.2]
+
+# ----------- COLLISIONS? --------------- #
+fruit = pygame.sprite.spritecollideany(player, fruit_sprites)
+if fruit:
+	fruit.reset()
 
 # ----------- GAME LOOP ---------------- #
 running = True 
@@ -279,27 +238,16 @@ while running:
   screen.fill((255, 255, 255))
       
   # ------------- DRAW --------------------------- #
-  screen.blit(bg, (0, 0))
-
   for entity in all_sprites:
     entity.move()
     entity.render(screen)
 
-    # fruit = pygame.sprite.spritecollideany(player, fruit_sprites)
-    # if fruit:
-    #   fruit.reset()
-
-    fish = pygame.sprite.spritecollideany(player, fish_sprites)
-    if fish:
-      fish.reset()
-
+    fruit = pygame.sprite.spritecollideany(player, fruit_sprites)
+    if fruit:
+      fruit.reset()
+      
     if pygame.sprite.collide_rect(player, bomb):
-      print(counter)
-      counter += 1
-      if counter > 10:
-        running = False
-
-
+	    running = False
   # --------- UPDATE --------------------------- #
   pygame.display.flip()
   clock.tick(60)
