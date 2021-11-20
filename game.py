@@ -142,7 +142,7 @@ class Strawberry(GameObject):
     elif self.direction == "right":
       self.y += self.dy
       self.x += self.dx  
-      if width + self.surf.get_width(): 
+      if self.x > width + self.surf.get_width(): 
         self.direction = "left"
         self.reset()    
 
@@ -161,6 +161,8 @@ class Fish(GameObject):
     elif self.direction == "right":
       self.y = choice(lanes_y)
       self.x = 0 - self.surf.get_width()
+    self.surf = pygame.transform.flip(self.surf, True,False)
+
 
   def move(self):
     if self.direction == "left":
@@ -172,9 +174,10 @@ class Fish(GameObject):
     elif self.direction == "right":
       self.y += self.dy
       self.x += self.dx  
-      if width + self.surf.get_width(): 
+      if self.x > width + self.surf.get_width(): 
         self.direction = "left"
         self.reset()    
+ 
 
 class Player(GameObject):
   def __init__(self):
@@ -231,8 +234,8 @@ fish = Fish()
 
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
-# all_sprites.add(strawberry)
-# all_sprites.add(apple)
+all_sprites.add(apple)
+all_sprites.add(strawberry)
 all_sprites.add(fish)
 
 all_sprites.add(bomb)
@@ -293,11 +296,11 @@ while running:
     if fish:
       fish.reset()
 
-    if pygame.sprite.collide_rect(player, bomb):
-      print(counter)
-      counter += 1
-      if counter > 10:
-        running = False
+    # if pygame.sprite.collide_rect(player, bomb):
+    #   print(counter)
+    #   counter += 1
+      # if counter > 10:
+      #   running = False
 
 
   # --------- UPDATE --------------------------- #
