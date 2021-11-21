@@ -31,9 +31,10 @@ class GameObject(pygame.sprite.Sprite):
     self.rect.y = self.y
     screen.blit(self.surf, (self.x, self.y))
 
+
 class Bomb(GameObject):
-  def __init__(self):
-    super(Bomb, self).__init__(0, 0, './images/bomb.png')
+  def __init__(self, image):
+    super(Bomb, self).__init__(0, 0, image)
     self.dy = lanes_x[-1]
     self.dx = (randint(0, 200) / 100) + 1
     self.direction = ""
@@ -47,6 +48,8 @@ class Bomb(GameObject):
 
   def reset(self):
     self.get_random_direction()
+    self.surf = pygame.transform.rotate(self.surf, 46)
+
     if self.direction == "down":
       self.x = choice(lanes_x)
       self.y = height + self.surf.get_height()
@@ -81,6 +84,7 @@ class Bomb(GameObject):
       self.y += self.dx  
       if self.y > height + self.surf.get_height(): 
         self.reset()  
+
       
   def get_random_direction(self):
     directions = ["down", "up", "left", "right"]
@@ -147,37 +151,43 @@ class Strawberry(GameObject):
         self.reset()    
 
 class Fish(GameObject):
-  def __init__(self):
-   super(Fish, self).__init__(0, 0, './images/fish.png')
+  def __init__(self, image, speed):
+   super(Fish, self).__init__(0, 0, image)
    self.dy = 0
-   self.dx = (randint(0, 200) / 100) + 1
+   self.dx = (randint(0, speed / 100) + 1)
    self.direction = "right"
    self.reset()
 
+  def flip(self):
+    if(self.direction == "right"):
+      self.surf = pygame.transform.flip(self.surf, True,False)
+      self.direction = "left"
+    elif(self.direction == "left"):
+      self.surf = pygame.transform.flip(self.surf, True,False)
+      self.direction = "right"
+
   def reset(self):
+    self.flip()
     if self.direction == "left":
       self.y = choice(lanes_y)
       self.x = width + self.surf.get_width()
     elif self.direction == "right":
       self.y = choice(lanes_y)
       self.x = 0 - self.surf.get_width()
-    self.surf = pygame.transform.flip(self.surf, True,False)
-
-
+  
   def move(self):
     if self.direction == "left":
       self.y -= self.dy
       self.x -= self.dx
       if self.x < 0 - self.surf.get_width():
-        self.direction = "right"
         self.reset()
     elif self.direction == "right":
       self.y += self.dy
       self.x += self.dx  
       if self.x > width + self.surf.get_width(): 
-        self.direction = "left"
         self.reset()    
- 
+
+
 
 class Player(GameObject):
   def __init__(self):
@@ -229,23 +239,39 @@ class Player(GameObject):
 apple = Apple()
 strawberry = Strawberry()
 player = Player()
-bomb = Bomb()
-fish = Fish()
+bottle = Bomb("./images/bottle.png")
+fish1 = Fish("./images/fish1.png", 100)
+# fish2 = Fish("./images/fish2.png", 300)
+# fish3 = Fish("./images/fish3.png",200)
+fish4 = Fish("./images/fish4.png", 100)
+# fish5 = Fish("./images/fish5.png", 300)
+fish6 = Fish("./images/fish6.png",200)
+
 
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
-all_sprites.add(apple)
-all_sprites.add(strawberry)
-all_sprites.add(fish)
+# all_sprites.add(apple)
+# all_sprites.add(strawberry)
+all_sprites.add(fish1)
+# all_sprites.add(fish2)
+# all_sprites.add(fish3)
+all_sprites.add(fish4)
+# all_sprites.add(fish5)
+all_sprites.add(fish6)
 
-all_sprites.add(bomb)
+all_sprites.add(bottle)
 
 # fruit_sprites = pygame.sprite.Group()
 # fruit_sprites.add(apple)
 # fruit_sprites.add(strawberry)
 
 fish_sprites = pygame.sprite.Group()
-fish_sprites.add(fish)
+fish_sprites.add(fish1)
+# fish_sprites.add(fish2)
+# fish_sprites.add(fish3)
+fish_sprites.add(fish4)
+# fish_sprites.add(fish5)
+fish_sprites.add(fish6)
 
 # ---------- SET VERTICAL LANES --------------- #
 num_v = 3
@@ -296,13 +322,25 @@ while running:
     if fish:
       fish.reset()
 
-    # if pygame.sprite.collide_rect(player, bomb):
-    #   print(counter)
-    #   counter += 1
-      # if counter > 10:
-      #   running = False
+    if pygame.sprite.collide_rect(player, bottle):
+      print(counter)
+      counter += 1
+      if counter > 10:
+        running = False
 
 
   # --------- UPDATE --------------------------- #
   pygame.display.flip()
   clock.tick(60)
+
+
+# ------ IDEAS ------------------------- #
+
+# keep score
+# lives
+# eating sound effects
+# fix overlapping fish
+# no spawn on bottle
+# more fish over time
+# pause method?
+# gifs?
